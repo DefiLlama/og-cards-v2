@@ -9,12 +9,23 @@ const interRegular = await Bun.file("./fonts/Inter-Regular.ttf").arrayBuffer();
 const interBold = await Bun.file("./fonts/Inter-Bold.ttf").arrayBuffer();
 
 // Load SVG logo and convert to data URL
-const defillamaSvgDarkBuffer = await Bun.file("./logo/defillama-dark.svg").arrayBuffer();
-const defillamaSvgLightBuffer = await Bun.file("./logo/defillama-light.svg").arrayBuffer();
-const defillamaSvgBase64Dark = Buffer.from(defillamaSvgDarkBuffer).toString("base64");
-const defillamaSvgBase64Light = Buffer.from(defillamaSvgLightBuffer).toString("base64");
-const defillamaLogoDataUrlDark = `data:image/svg+xml;base64,${defillamaSvgBase64Dark}`;
-const defillamaLogoDataUrlLight = `data:image/svg+xml;base64,${defillamaSvgBase64Light}`;
+const llamaIconBuffer = await Bun.file("./logo/llama-icon.svg").arrayBuffer();
+const llamaIconBase64 = Buffer.from(llamaIconBuffer).toString("base64");
+const llamaIconDataUrl = `data:image/svg+xml;base64,${llamaIconBase64}`;
+
+const llamaNameWhiteBuffer = await Bun.file(
+  "./logo/llama-name-white.svg"
+).arrayBuffer();
+const llamaNameWhiteBase64 =
+  Buffer.from(llamaNameWhiteBuffer).toString("base64");
+const llamaNameWhiteDataUrl = `data:image/svg+xml;base64,${llamaNameWhiteBase64}`;
+
+const llamaNameBlackBuffer = await Bun.file(
+  "./logo/llama-name-black.svg"
+).arrayBuffer();
+const llamaNameBlackBase64 =
+  Buffer.from(llamaNameBlackBuffer).toString("base64");
+const llamaNameBlackDataUrl = `data:image/svg+xml;base64,${llamaNameBlackBase64}`;
 
 const fonts = [
   {
@@ -60,23 +71,175 @@ const server = Bun.serve({
         url.searchParams.get("footerUrl") || "https://defillama.com"
       );
 
+      // Fetch and convert project logo to PNG
+      let projectLogoDataUrl = null;
+
+      if (projectLogo) {
+        try {
+          const response = await fetch(projectLogo);
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            // Convert to PNG using sharp
+            const pngBuffer = await sharp(Buffer.from(arrayBuffer))
+              .resize(100, 100, {
+                fit: "contain",
+                background: { r: 0, g: 0, b: 0, alpha: 0 },
+              })
+              .png()
+              .toBuffer();
+            const base64 = pngBuffer.toString("base64");
+            projectLogoDataUrl = `data:image/png;base64,${base64}`;
+          }
+        } catch (error) {
+          console.error("Error fetching/converting project logo:", error);
+        }
+      }
+
       const svg = await satori(
         {
           type: "div",
           props: {
             children: [
-              {
-                type: "div",
-                props: {
-                  children: { type: "img", props: { src: theme === "dark" ? defillamaLogoDataUrlLight : defillamaLogoDataUrlDark, height: 120 }, style: { objectFit: "contain" } },
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-					flex: 1,
+              projectName
+                ? {
+                    type: "div",
+                    props: {
+                      children: [
+                        projectLogoDataUrl
+                          ? {
+                              type: "div",
+                              props: {
+                                children: [
+                                  {
+                                    type: "img",
+                                    props: {
+                                      src: projectLogoDataUrl,
+                                      height: 100,
+                                      width: 100,
+                                      style: {
+                                        borderRadius: "100%",
+                                        objectFit: "contain",
+                                      },
+                                    },
+                                  },
+                                  {
+                                    type: "div",
+                                    props: {
+                                      children: projectName,
+                                      style: {
+                                        fontSize: "48px",
+                                        fontWeight: 600,
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      },
+                                    },
+                                  },
+                                ],
+                                style: {
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-start",
+                                  flexWrap: "nowrap",
+                                  gap: "20px",
+                                },
+                              },
+                            }
+                          : {
+                              type: "div",
+                              props: {
+                                children: projectName,
+                                style: {
+                                  fontSize: "48px",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                },
+                              },
+                            },
+                        {
+                          type: "div",
+                          props: {
+                            children: [
+                              {
+                                type: "img",
+                                props: {
+                                  src: llamaIconDataUrl,
+                                  height: 100,
+                                },
+                              },
+                              {
+                                type: "img",
+                                props: {
+                                  src:
+                                    theme === "dark"
+                                      ? llamaNameWhiteDataUrl
+                                      : llamaNameBlackDataUrl,
+                                  height: 48,
+								  width: 220
+                                },
+                              },
+                            ],
+                            style: {
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              gap: "20px",
+                              flex: 1,
+                            },
+                          },
+                        },
+                      ],
+                      style: {
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flex: 1,
+                        gap: "48px",
+                        flexWrap: "nowrap",
+                        overflow: "hidden",
+                      },
+                    },
+                  }
+                : {
+                    type: "div",
+                    props: {
+                      children: [
+                        {
+                          type: "img",
+                          props: {
+                            src: llamaIconDataUrl,
+                            height: 120,
+                          },
+                        },
+                        {
+                          type: "img",
+                          props: {
+                            src:
+                              theme === "dark"
+                                ? llamaNameWhiteDataUrl
+                                : llamaNameBlackDataUrl,
+                            height: 48,
+							width: 220
+                          },
+                        },
+                      ],
+                      style: {
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "20px",
+                        flex: 1,
+                      },
+                    },
                   },
-                },
-              },
               {
                 type: "div",
                 props: {
