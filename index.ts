@@ -76,7 +76,7 @@ const server = Bun.serve({
         url.searchParams.get("footerUrl") || "https://defillama.com"
       );
       const projectLogoDataUrl = projectLogo;
-	  
+
       // Fetch and convert project logo to PNG
       //   let projectLogoDataUrl = null;
 
@@ -387,7 +387,7 @@ const server = Bun.serve({
 
       // footer text
       content.push({
-        type: "div",
+        type: "p",
         props: {
           children: `DefiLlama is committed to providing accurate data without advertisements or sponsored content, as well as transparency. Learn more on: ${footerUrl}`,
           style: {
@@ -397,7 +397,9 @@ const server = Bun.serve({
             marginTop: "auto",
             display: "flex",
             justifyContent: metricName && metricValue ? "flex-start" : "center",
+			textAlign: metricName && metricValue ? "left" : "center",
             alignItems: "center",
+			marginBottom: "0"
           },
         },
       });
