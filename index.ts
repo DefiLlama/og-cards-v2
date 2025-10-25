@@ -62,6 +62,11 @@ const server = Bun.serve({
         url.searchParams.get("projectName"),
         100
       );
+      const metricName = sanitizeText(url.searchParams.get("metricName"), 100);
+      const metricValue = sanitizeText(
+        url.searchParams.get("metricValue"),
+        100
+      );
       const theme =
         url.searchParams.get("theme") === "light" ? "light" : "dark";
 
@@ -95,166 +100,181 @@ const server = Bun.serve({
         }
       }
 
+      const content = [];
+
+      if (projectName) {
+        const projectAndLlama = [];
+        if (projectLogoDataUrl) {
+          // project logo and name on the left
+          projectAndLlama.push({
+            type: "div",
+            props: {
+              children: [
+                {
+                  type: "img",
+                  props: {
+                    src: projectLogoDataUrl,
+                    height: 100,
+                    width: 100,
+                    style: {
+                      borderRadius: "100%",
+                      objectFit: "contain",
+                    },
+                  },
+                },
+                {
+                  type: "div",
+                  props: {
+                    children: projectName,
+                    style: {
+                      fontSize: "48px",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
+                  },
+                },
+              ],
+              style: {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                flexWrap: "nowrap",
+                gap: "20px",
+              },
+            },
+          });
+        } else {
+          // project name only on left
+          projectAndLlama.push({
+            type: "div",
+            props: {
+              children: projectName,
+              style: {
+                fontSize: "48px",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              },
+            },
+          });
+        }
+
+        // llama logo and name on the right
+        projectAndLlama.push({
+          type: "div",
+          props: {
+            children: [
+              {
+                type: "img",
+                props: {
+                  src: llamaIconDataUrl,
+                  height: 100,
+                },
+              },
+              {
+                type: "img",
+                props: {
+                  src:
+                    theme === "dark"
+                      ? llamaNameWhiteDataUrl
+                      : llamaNameBlackDataUrl,
+                  height: 48,
+                  width: 220,
+                },
+              },
+            ],
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "20px",
+              flex: 1,
+            },
+          },
+        });
+
+        // project on the left, llama on the right
+        content.push({
+          type: "div",
+          props: {
+            children: projectAndLlama,
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flex: 1,
+              gap: "48px",
+              flexWrap: "nowrap",
+              overflow: "hidden",
+            },
+          },
+        });
+      } else {
+        // llama in center of the image
+        content.push({
+          type: "div",
+          props: {
+            children: [
+              {
+                type: "img",
+                props: {
+                  src: llamaIconDataUrl,
+                  height: 120,
+                },
+              },
+              {
+                type: "img",
+                props: {
+                  src:
+                    theme === "dark"
+                      ? llamaNameWhiteDataUrl
+                      : llamaNameBlackDataUrl,
+                  height: 48,
+                  width: 220,
+                },
+              },
+            ],
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "20px",
+              flex: 1,
+            },
+          },
+        });
+      }
+
+      // footer text
+      content.push({
+        type: "div",
+        props: {
+          children: `DefiLlama is committed to providing accurate data without advertisements or sponsored content, as well as transparency. Learn more on : ${footerUrl}`,
+          style: {
+            textAlign: "center",
+            fontSize: "12px",
+            marginTop: "auto",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        },
+      });
+
       const svg = await satori(
         {
           type: "div",
           props: {
-            children: [
-              projectName
-                ? {
-                    type: "div",
-                    props: {
-                      children: [
-                        projectLogoDataUrl
-                          ? {
-                              type: "div",
-                              props: {
-                                children: [
-                                  {
-                                    type: "img",
-                                    props: {
-                                      src: projectLogoDataUrl,
-                                      height: 100,
-                                      width: 100,
-                                      style: {
-                                        borderRadius: "100%",
-                                        objectFit: "contain",
-                                      },
-                                    },
-                                  },
-                                  {
-                                    type: "div",
-                                    props: {
-                                      children: projectName,
-                                      style: {
-                                        fontSize: "48px",
-                                        fontWeight: 600,
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      },
-                                    },
-                                  },
-                                ],
-                                style: {
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "flex-start",
-                                  flexWrap: "nowrap",
-                                  gap: "20px",
-                                },
-                              },
-                            }
-                          : {
-                              type: "div",
-                              props: {
-                                children: projectName,
-                                style: {
-                                  fontSize: "48px",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                },
-                              },
-                            },
-                        {
-                          type: "div",
-                          props: {
-                            children: [
-                              {
-                                type: "img",
-                                props: {
-                                  src: llamaIconDataUrl,
-                                  height: 100,
-                                },
-                              },
-                              {
-                                type: "img",
-                                props: {
-                                  src:
-                                    theme === "dark"
-                                      ? llamaNameWhiteDataUrl
-                                      : llamaNameBlackDataUrl,
-                                  height: 48,
-								  width: 220
-                                },
-                              },
-                            ],
-                            style: {
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                              gap: "20px",
-                              flex: 1,
-                            },
-                          },
-                        },
-                      ],
-                      style: {
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        flex: 1,
-                        gap: "48px",
-                        flexWrap: "nowrap",
-                        overflow: "hidden",
-                      },
-                    },
-                  }
-                : {
-                    type: "div",
-                    props: {
-                      children: [
-                        {
-                          type: "img",
-                          props: {
-                            src: llamaIconDataUrl,
-                            height: 120,
-                          },
-                        },
-                        {
-                          type: "img",
-                          props: {
-                            src:
-                              theme === "dark"
-                                ? llamaNameWhiteDataUrl
-                                : llamaNameBlackDataUrl,
-                            height: 48,
-							width: 220
-                          },
-                        },
-                      ],
-                      style: {
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "20px",
-                        flex: 1,
-                      },
-                    },
-                  },
-              {
-                type: "div",
-                props: {
-                  children: `DefiLlama is committed to providing accurate data without advertisements or sponsored content, as well as transparency. Learn more on : ${footerUrl}`,
-                  style: {
-                    textAlign: "center",
-                    fontSize: "12px",
-                    marginTop: "auto",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                },
-              },
-            ],
+            children: content,
             style: {
               width: "100%",
               height: "100%",
