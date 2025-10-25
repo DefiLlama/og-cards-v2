@@ -7,7 +7,7 @@ const interRegular = await Bun.file('./fonts/Inter-Regular.ttf').arrayBuffer();
 const interBold = await Bun.file('./fonts/Inter-Bold.ttf').arrayBuffer();
 
 const server = Bun.serve({
-	port: 3000,
+	port: process.env.PORT || 3000,
 	async fetch(req) {
 		const url = new URL(req.url);
 	
@@ -39,14 +39,14 @@ const server = Bun.serve({
 			}
 		  )
 		
-		const resvg = new Resvg(svg, {
-			fitTo: {
-				mode: 'width',
-				value: 1200,
-			},
-		});
-		const pngData = resvg.render();
-		const pngBuffer = pngData.asPng();
+	const resvg = new Resvg(svg, {
+		fitTo: {
+			mode: 'width',
+			value: 4800, // 4x resolution for crisp high-DPI displays (1200 * 4)
+		},
+	});
+	const pngData = resvg.render();
+	const pngBuffer = pngData.asPng();
 
 		return new Response(pngBuffer, {
 			headers: {
@@ -55,6 +55,4 @@ const server = Bun.serve({
 		});
 	},
 });
-
-console.log(`Listening on ${server.url}`);
 
