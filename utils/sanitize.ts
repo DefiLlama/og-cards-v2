@@ -48,6 +48,7 @@ export function sanitizeImageUrl(
     const url = new URL(input);
     // Only allow https protocol and icons.llamao.fi domain
     if (url.protocol === "https:" && url.hostname === "icons.llamao.fi") {
+      url.searchParams.set("format", "png");
       return url.toString();
     }
     return null;

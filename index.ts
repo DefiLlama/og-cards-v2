@@ -75,34 +75,166 @@ const server = Bun.serve({
       const footerUrl = sanitizeUrl(
         url.searchParams.get("footerUrl") || "https://defillama.com"
       );
-
+      const projectLogoDataUrl = projectLogo;
+	  
       // Fetch and convert project logo to PNG
-      let projectLogoDataUrl = null;
+      //   let projectLogoDataUrl = null;
 
-      if (projectLogo) {
-        try {
-          const response = await fetch(projectLogo);
-          if (response.ok) {
-            const arrayBuffer = await response.arrayBuffer();
-            // Convert to PNG using sharp
-            const pngBuffer = await sharp(Buffer.from(arrayBuffer))
-              .resize(100, 100, {
-                fit: "contain",
-                background: { r: 0, g: 0, b: 0, alpha: 0 },
-              })
-              .png()
-              .toBuffer();
-            const base64 = pngBuffer.toString("base64");
-            projectLogoDataUrl = `data:image/png;base64,${base64}`;
-          }
-        } catch (error) {
-          console.error("Error fetching/converting project logo:", error);
-        }
-      }
+      //   if (projectLogo) {
+      //     try {
+      //       const response = await fetch(projectLogo);
+      //       if (response.ok) {
+      //         const arrayBuffer = await response.arrayBuffer();
+      //         // Convert to PNG using sharp
+      //         const pngBuffer = await sharp(Buffer.from(arrayBuffer))
+      //           .resize(100, 100, {
+      //             fit: "contain",
+      //             background: { r: 0, g: 0, b: 0, alpha: 0 },
+      //           })
+      //           .png()
+      //           .toBuffer();
+      //         const base64 = pngBuffer.toString("base64");
+      //         projectLogoDataUrl = `data:image/png;base64,${base64}`;
+      //       }
+      //     } catch (error) {
+      //       console.error("Error fetching/converting project logo:", error);
+      //     }
+      //   }
 
       const content = [];
 
-      if (projectName) {
+      if (metricName && metricValue) {
+        const header = [];
+
+        if (projectName) {
+          if (projectLogoDataUrl) {
+            header.push({
+              type: "div",
+              props: {
+                children: [
+                  {
+                    type: "img",
+                    props: {
+                      src: projectLogoDataUrl,
+                      height: 80,
+                      width: 80,
+                      style: {
+                        borderRadius: "100%",
+                        objectFit: "contain",
+                      },
+                    },
+                  },
+                  {
+                    type: "div",
+                    props: {
+                      children: projectName,
+                      style: {
+                        fontSize: "36px",
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      },
+                    },
+                  },
+                ],
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  flexWrap: "nowrap",
+                  gap: "16px",
+                },
+              },
+            });
+          } else {
+            header.push({
+              type: "div",
+              props: {
+                children: projectName,
+                style: {
+                  fontSize: "36px",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              },
+            });
+          }
+        }
+
+        header.push({
+          type: "div",
+          props: {
+            children: [
+              {
+                type: "img",
+                props: {
+                  src: llamaIconDataUrl,
+                  height: 80,
+                },
+              },
+              {
+                type: "img",
+                props: {
+                  src:
+                    theme === "dark"
+                      ? llamaNameWhiteDataUrl
+                      : llamaNameBlackDataUrl,
+                  height: 38,
+                  width: 174,
+                },
+              },
+            ],
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: projectName ? "flex-end" : "flex-start",
+              gap: "16px",
+            },
+          },
+        });
+
+        content.push({
+          type: "div",
+          props: {
+            children: header,
+            style: {
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "48px",
+              flexWrap: "nowrap",
+              overflow: "hidden",
+            },
+          },
+        });
+
+        content.push({
+          type: "div",
+          props: {
+            content: "",
+            style: {
+              flex: 1,
+              borderRadius: "40px",
+              backgroundColor:
+                theme === "dark" ? "#1C1F2E" : "rgba(230, 232, 248, 0.6)",
+              margin: "44px auto 44px 0",
+              minWidth: "70%",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+          },
+        });
+      } else if (projectName) {
         const projectAndLlama = [];
         if (projectLogoDataUrl) {
           // project logo and name on the left
@@ -197,7 +329,6 @@ const server = Bun.serve({
               alignItems: "center",
               justifyContent: "flex-end",
               gap: "20px",
-              flex: 1,
             },
           },
         });
@@ -258,13 +389,14 @@ const server = Bun.serve({
       content.push({
         type: "div",
         props: {
-          children: `DefiLlama is committed to providing accurate data without advertisements or sponsored content, as well as transparency. Learn more on : ${footerUrl}`,
+          children: `DefiLlama is committed to providing accurate data without advertisements or sponsored content, as well as transparency. Learn more on: ${footerUrl}`,
           style: {
-            textAlign: "center",
-            fontSize: "12px",
+            fontSize: "24px",
+            fontStyle: "italic",
+            color: theme === "dark" ? "rgba(149, 153, 171, 0.9)" : "#575A68",
             marginTop: "auto",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: metricName && metricValue ? "flex-start" : "center",
             alignItems: "center",
           },
         },
